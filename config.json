@@ -10,6 +10,8 @@
 		"length": 6
 	},
 	"index": {
-		"title": "Jck Host"
+		"title": "Jck Host",
+		"color": "#662aac",
+		"embed": false
 	}
 }

@@ -2,3 +2,5 @@ node_modules
 tmp
 uploads
 .env
+data.json
+config.json

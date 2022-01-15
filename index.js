@@ -28,17 +28,7 @@ function generateString(length) {
 	return result;
 }
 
-app.use(
-	formidable({
-		encoding: "utf-8",
-		uploadDir: path.join(__dirname, "tmp"),
-		multiples: true,
-		keepExtensions: true,
-		maxFieldsSize: config.files.maxSize * 1024 * 1024,
-	})
-);
-
-app.get("/", (req, res) => {
+function getUploadSize() {
 	function niceBytes(x) {
 		const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 		let l = 0,
@@ -53,12 +43,38 @@ app.get("/", (req, res) => {
 		size += fs.statSync(path.join(__dirname, "uploads", file)).size;
 	});
 
+	return niceBytes(size);
+}
+
+app.use(
+	formidable({
+		encoding: "utf-8",
+		uploadDir: path.join(__dirname, "tmp"),
+		multiples: true,
+		keepExtensions: true,
+		maxFieldsSize: config.files.maxSize * 1024 * 1024,
+	})
+);
+
+app.get("/", (req, res) => {
 	var locals = {
-		size: niceBytes(size),
+		size: getUploadSize(),
 		title: config.index.title,
 	};
 
 	res.render("pages/index.ejs", locals);
+});
+
+app.get("/image/:id", (req, res) => {
+	var data = require("./data.json");
+	var id = req.params.id.split(".")[0];
+	if (!data.hasOwnProperty(id)) return res.status(404).send("File not found");
+	var entry = data[id];
+	if (entry.type == "file") {
+		return res.sendFile(__dirname + "/uploads/" + data[id].filename);
+	}
+
+	if (entry.type == "url") return res.redirect(307, data[id].url);
 });
 
 app.get("/:id", (req, res) => {
@@ -66,7 +82,18 @@ app.get("/:id", (req, res) => {
 	var id = req.params.id.split(".")[0];
 	if (!data.hasOwnProperty(id)) return res.status(404).send("File not found");
 	var entry = data[id];
-	if (entry.type == "file") return res.sendFile(__dirname + "/uploads/" + data[id].filename);
+	if (entry.type == "file") {
+		if (config.index.embed)
+			return res.render("pages/embed.ejs", {
+				title: config.index.title,
+				size: getUploadSize(),
+				color: config.index.color,
+				url: config.domain + "/image/" + id,
+				id,
+			});
+		return res.sendFile(__dirname + "/uploads/" + data[id].filename);
+	}
+
 	if (entry.type == "url") return res.redirect(307, data[id].url);
 });
 
