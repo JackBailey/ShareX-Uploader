@@ -1,0 +1,15 @@
+{
+	"domain": "http://localhost:8080",
+	"port": 8080,
+	"files": {
+		"maxSize": 100,
+		"chars": ["LOWERCASE", "NUMBERS"],
+		"length": 5
+	},
+	"urls": {
+		"length": 6
+	},
+	"index": {
+		"title": "Jck Host"
+	}
+}
