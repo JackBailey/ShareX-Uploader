@@ -4,3 +4,4 @@ uploads
 .env
 data.json
 config.json
+*.sxcu

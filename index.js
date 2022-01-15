@@ -65,6 +65,26 @@ app.get("/", (req, res) => {
 	res.render("pages/index.ejs", locals);
 });
 
+app.get("/config/:key", (req, res) => {
+	if (req?.params?.key != process.env.KEY) return res.status(400).json({ msg: "Invalid Key" });
+	const { hostname } = new URL(config.domain);
+	var file = {
+		Version: "13.1.0",
+		Name: config.index.title,
+		DestinationType: "ImageUploader, URLShortener",
+		RequestMethod: "POST",
+		RequestURL: config.domain,
+		Body: "MultipartFormData",
+		Arguments: {
+			url: "$input$",
+			key: req.params.key,
+		},
+		FileFormName: "sharex",
+	};
+	fs.writeFileSync(path.join(__dirname, "sharex.sxcu"), JSON.stringify(file, null, 2));
+	res.download(path.join(__dirname, "sharex.sxcu"), hostname + ".sxcu");
+});
+
 app.get("/image/:id", (req, res) => {
 	var data = require("./data.json");
 	var id = req.params.id.split(".")[0];
@@ -145,6 +165,8 @@ app.post("/", (req, res) => {
 
 app.listen(config.port, () => {
 	console.log("Server is running on port " + config.port);
+	var data = require("./data.json");
+	if (Object.keys(data) == 0) console.log(`No images/urls uploaded yet - the config is at ${config.domain}/config/${process.env.KEY}`);
 	fs.readdirSync(path.join(__dirname, "tmp")).forEach((file) => {
 		fs.unlinkSync(path.join(__dirname, "tmp", file));
 	});
