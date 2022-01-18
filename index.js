@@ -21,7 +21,7 @@ if (!fs.existsSync("./tmp")) {
 }
 
 if (!fs.existsSync("./config.json")) {
-	var config = {
+	var Config = {
 		domain: "http://localhost:8080",
 		port: 8080,
 		files: {
@@ -38,7 +38,7 @@ if (!fs.existsSync("./config.json")) {
 			embed: false,
 		},
 	};
-	fs.writeFileSync("./config.json", JSON.stringify(config, null, 4));
+	fs.writeFileSync("./config.json", JSON.stringify(Config, null, 4));
 }
 
 if (!fs.existsSync("./data.json")) {
@@ -210,7 +210,7 @@ app.post("/", (req, res) => {
 app.listen(config.port, () => {
 	console.log("Server is running on port " + config.port);
 	var data = require("./data.json");
-	var key = process.env.KEY(process.env.KEY);
+	var key = encodeURI(process.env.KEY);
 	if (Object.keys(data) == 0) console.log(`No images/urls uploaded yet - the config is at ${config.domain}/config/${key}`);
 	fs.readdirSync(path.join(__dirname, "tmp")).forEach((file) => {
 		fs.unlinkSync(path.join(__dirname, "tmp", file));
