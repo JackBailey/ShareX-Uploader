@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-let config = require("./config.json");
+
 let formidable = require("express-formidable");
 let path = require("path");
 let uuid4 = require("uuid4");
@@ -10,6 +10,43 @@ require("dotenv").config();
 const app = express();
 
 app.set("view engine", "ejs");
+
+// init files
+
+if (!fs.existsSync("./uploads")) {
+	fs.mkdirSync("./uploads");
+}
+if (!fs.existsSync("./tmp")) {
+	fs.mkdirSync("./tmp");
+}
+
+if (!fs.existsSync("./config.json")) {
+	var config = {
+		domain: "http://localhost:8080",
+		port: 8080,
+		files: {
+			maxSize: 100,
+			chars: ["LOWERCASE", "UPPERCASE", "NUMBERS"],
+			length: 5,
+		},
+		urls: {
+			length: 6,
+		},
+		index: {
+			title: "My Host",
+			color: "#662aac",
+			embed: false,
+		},
+	};
+	fs.writeFileSync("./config.json", JSON.stringify(config, null, 4));
+}
+
+if (!fs.existsSync("./data.json")) {
+	var data = {};
+	fs.writeFileSync("./data.json", JSON.stringify(data, null, 4));
+}
+
+let config = require("./config.json");
 
 function generateString(length) {
 	var data = require("./data.json");
@@ -166,7 +203,8 @@ app.post("/", (req, res) => {
 app.listen(config.port, () => {
 	console.log("Server is running on port " + config.port);
 	var data = require("./data.json");
-	if (Object.keys(data) == 0) console.log(`No images/urls uploaded yet - the config is at ${config.domain}/config/${process.env.KEY}`);
+	var key = process.env.KEY(process.env.KEY);
+	if (Object.keys(data) == 0) console.log(`No images/urls uploaded yet - the config is at ${config.domain}/config/${key}`);
 	fs.readdirSync(path.join(__dirname, "tmp")).forEach((file) => {
 		fs.unlinkSync(path.join(__dirname, "tmp", file));
 	});
