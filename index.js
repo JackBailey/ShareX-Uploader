@@ -46,6 +46,11 @@ if (!fs.existsSync("./data.json")) {
 	fs.writeFileSync("./data.json", JSON.stringify(data, null, 4));
 }
 
+if (!fs.existsSync("./.env")) {
+	console.log("Created .env - please change this key!");
+	fs.writeFileSync("./.env", "KEY=password123");
+}
+
 let config = require("./config.json");
 
 function generateString(length) {
