@@ -70,16 +70,17 @@ function generateString(length) {
 	return result;
 }
 
-function getUploadSize() {
-	function niceBytes(x) {
-		const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-		let l = 0,
-			n = parseInt(x, 10) || 0;
-		while (n >= 1024 && ++l) {
-			n = n / 1024;
-		}
-		return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+function niceBytes(x) {
+	const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+	let l = 0,
+		n = parseInt(x, 10) || 0;
+	while (n >= 1024 && ++l) {
+		n = n / 1024;
 	}
+	return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+}
+
+function getUploadSize() {
 	var size = 0;
 	fs.readdirSync(path.join(__dirname, "uploads")).forEach((file) => {
 		size += fs.statSync(path.join(__dirname, "uploads", file)).size;
@@ -144,11 +145,12 @@ app.get("/:id", (req, res) => {
 	var id = req.params.id.split(".")[0];
 	if (!data.hasOwnProperty(id)) return res.status(404).send("File not found");
 	var entry = data[id];
+	var size = fs.statSync(path.join(__dirname, "uploads", entry.filename)).size;
 	if (entry.type == "file") {
 		if (config.index.embed)
 			return res.render("pages/embed.ejs", {
 				title: config.index.title,
-				size: getUploadSize(),
+				size: niceBytes(size),
 				color: config.index.color,
 				url: config.domain + "/image/" + id,
 				id,
